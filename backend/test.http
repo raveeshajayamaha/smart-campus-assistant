@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:5000
+
+### Create an event (each send creates a new MongoDB document)
+POST {{baseUrl}}/api/events
+Content-Type: application/json
+
+{
+  "title": "AI & Future Technologies Workshop",
+  "description": "Workshop about artificial intelligence and future technologies.",
+  "date": "2026-10-25",
+  "time": "10:00 AM - 12:00 PM",
+  "location": "Main Auditorium",
+  "image": "/images/event1.png",
+  "category": "Workshop"
+}
+
+### Retrieve all events, sorted by date
+GET {{baseUrl}}/api/events
+Accept: application/json
