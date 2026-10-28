@@ -1,3 +1,7 @@
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { api, logout } from "../lib/api";
+import "./CampusPages.css";
 import {
   Search,
   Bell,
@@ -15,13 +19,32 @@ import {
   Users,
   CircleHelp,
   Send,
-  Paperclip,
   Clock,
 } from "lucide-react";
 
 import "./Assistant.css";
 
 function Assistant() {
+  const location = useLocation();
+  const [input, setInput] = useState(typeof location.state?.question === "string" ? location.state.question : "");
+  const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const pending = useRef(false);
+  const transcript = useRef<HTMLDivElement>(null);
+  useEffect(() => { transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: "smooth" }); }, [messages, loading]);
+  async function send(question: string) {
+    if (!question.trim() || pending.current) return;
+    pending.current = true; setLoading(true); setError(""); setInput("");
+    setMessages(m => [...m, { role: "You", text: question.trim() }]);
+    try { const data = await api("/assistant/chat", { method: "POST", body: JSON.stringify({ message: question.trim() }) }); setMessages(m => [...m, { role: "Assistant", text: data.reply }]); }
+    catch (error) { setError(error instanceof Error ? error.message : "Unable to send message"); setInput(question); }
+    finally { pending.current = false; setLoading(false); }
+  }
+  const questions: Record<string, string> = {
+    "Academic Information": "When is my next class?", "Campus Events": "What events are coming up?", "Library Services": "What library resources are available?", "Campus Facilities": "Where is the computer lab?", "Student Services": "Where is student support?", "General Questions": "Are there any announcements?",
+    "Class Timetable": "What is my class timetable?", "Exam Schedule": "What exams are scheduled?", "Library Hours": "What are the library hours?", "Campus Map": "Show campus locations", "Upcoming Events": "What events are coming up?", "Student Support": "Where is student support?"
+  };
   return (
     <div className="assistant-page">
 
@@ -61,27 +84,27 @@ function Assistant() {
             AI Assistant
           </a>
 
-          <a href="#">
+          <a href="/events">
             <CalendarDays size={22} />
             Events
           </a>
 
-          <a href="#">
+          <a href="/academic">
             <BookOpen size={22} />
             Academic Info
           </a>
 
-          <a href="#">
+          <a href="/library">
             <Library size={22} />
             Library
           </a>
 
-          <a href="#">
+          <a href="/locations">
             <MapPin size={22} />
             Campus Map
           </a>
 
-          <a href="#">
+          <a href="/profile">
             <User size={22} />
             Profile
           </a>
@@ -89,7 +112,7 @@ function Assistant() {
         </nav>
 
 
-        <a className="assistant-logout" href="/login">
+        <a className="assistant-logout" href="/login" onClick={e => { e.preventDefault(); void logout(); }}>
           <LogOut size={22} />
           Logout
         </a>
@@ -108,7 +131,7 @@ function Assistant() {
 
             <input
               type="text"
-              placeholder="Search events, services, or ask AI..."
+              placeholder="Search events, services, or ask AI..." onKeyDown={e => { if (e.key === "Enter") void send(e.currentTarget.value); }}
             />
           </div>
 
@@ -186,7 +209,7 @@ function Assistant() {
                 </div>
 
                 <small className="message-time">
-                  10:24 AM
+                  Campus information assistant
                 </small>
 
               </div>
@@ -194,6 +217,8 @@ function Assistant() {
             </div>
 
 
+            <div className="chat-transcript" ref={transcript} role="log" aria-live="polite">{messages.map((m, i) => <div className={`assistant-message ${m.role === "You" ? "chat-user" : ""}`} key={i}><h3>{m.role}</h3><p>{m.text}</p></div>)}{loading && <p role="status">Looking up campus information...</p>}</div>
+            {error && <p role="alert">{error} Your question is in the input so you can retry.</p>}
             {/* SUGGESTED QUESTIONS */}
             <h2 className="try-title">
               Try asking about...
@@ -203,6 +228,7 @@ function Assistant() {
             <div className="assistant-topic-grid">
 
               <TopicCard
+                onSelect={title => void send(questions[title] || title)}
                 className="topic-blue"
                 icon={<GraduationCap />}
                 title="Academic Information"
@@ -210,6 +236,7 @@ function Assistant() {
               />
 
               <TopicCard
+                onSelect={title => void send(questions[title] || title)}
                 className="topic-red"
                 icon={<CalendarDays />}
                 title="Campus Events"
@@ -217,6 +244,7 @@ function Assistant() {
               />
 
               <TopicCard
+                onSelect={title => void send(questions[title] || title)}
                 className="topic-green"
                 icon={<BookOpen />}
                 title="Library Services"
@@ -224,6 +252,7 @@ function Assistant() {
               />
 
               <TopicCard
+                onSelect={title => void send(questions[title] || title)}
                 className="topic-orange"
                 icon={<MapPin />}
                 title="Campus Facilities"
@@ -231,6 +260,7 @@ function Assistant() {
               />
 
               <TopicCard
+                onSelect={title => void send(questions[title] || title)}
                 className="topic-purple"
                 icon={<Users />}
                 title="Student Services"
@@ -238,6 +268,7 @@ function Assistant() {
               />
 
               <TopicCard
+                onSelect={title => void send(questions[title] || title)}
                 className="topic-lightblue"
                 icon={<CircleHelp />}
                 title="General Questions"
@@ -248,22 +279,10 @@ function Assistant() {
 
 
             {/* INPUT AREA */}
-            <div className="assistant-input-area">
-
-              <button className="attach-button">
-                <Paperclip size={22} />
-              </button>
-
-              <input
-                type="text"
-                placeholder="Ask me anything about your campus..."
-              />
-
-              <button className="send-button">
-                <Send size={22} />
-              </button>
-
-            </div>
+            <form className="assistant-input-area" onSubmit={e => { e.preventDefault(); void send(input); }}>
+              <input aria-label="Campus question" maxLength={2000} value={input} onChange={e => setInput(e.target.value)} placeholder="Ask me anything about your campus..." />
+              <button className="send-button" type="submit" aria-label="Send message" disabled={loading || !input.trim()}><Send size={22} /></button>
+            </form>
 
           </section>
 
@@ -277,36 +296,42 @@ function Assistant() {
               <h2>Popular Topics</h2>
 
               <PopularTopic
+                onSelect={title => void send(questions[title] || title)}
                 className="popular-blue"
                 icon={<GraduationCap />}
                 text="Class Timetable"
               />
 
               <PopularTopic
+                onSelect={title => void send(questions[title] || title)}
                 className="popular-red"
                 icon={<CalendarDays />}
                 text="Exam Schedule"
               />
 
               <PopularTopic
+                onSelect={title => void send(questions[title] || title)}
                 className="popular-green"
                 icon={<BookOpen />}
                 text="Library Hours"
               />
 
               <PopularTopic
+                onSelect={title => void send(questions[title] || title)}
                 className="popular-orange"
                 icon={<MapPin />}
                 text="Campus Map"
               />
 
               <PopularTopic
+                onSelect={title => void send(questions[title] || title)}
                 className="popular-purple"
                 icon={<CalendarDays />}
                 text="Upcoming Events"
               />
 
               <PopularTopic
+                onSelect={title => void send(questions[title] || title)}
                 className="popular-lightblue"
                 icon={<Users />}
                 text="Student Support"
@@ -323,25 +348,8 @@ function Assistant() {
                 Recent Chats
               </h2>
 
-              <RecentChat
-                text="Library opening hours"
-                time="2 hours ago"
-              />
-
-              <RecentChat
-                text="Where is the computer lab?"
-                time="1 day ago"
-              />
-
-              <RecentChat
-                text="Upcoming events this week"
-                time="2 days ago"
-              />
-
-              <RecentChat
-                text="How to register for courses?"
-                time="3 days ago"
-              />
+              {messages.filter(m => m.role === "You").slice(-4).map((m, i) => <RecentChat key={i} text={m.text} time="This session" onSelect={text => void send(text)} />)}
+              {!messages.length && <p>Your questions will appear here.</p>}
 
             </div>
 
@@ -357,18 +365,20 @@ function Assistant() {
 
 
 function TopicCard({
+  onSelect,
   icon,
   title,
   description,
   className,
 }: {
+  onSelect: (value: string) => void;
   icon: React.ReactNode;
   title: string;
   description: string;
   className: string;
 }) {
   return (
-    <div className={`assistant-topic-card ${className}`}>
+    <div className={`assistant-topic-card ${className}`} role="button" tabIndex={0} onClick={() => onSelect(title)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(title); } }}>
 
       <div className="topic-icon">
         {icon}
@@ -385,16 +395,18 @@ function TopicCard({
 
 
 function PopularTopic({
+  onSelect,
   icon,
   text,
   className,
 }: {
+  onSelect: (value: string) => void;
   icon: React.ReactNode;
   text: string;
   className: string;
 }) {
   return (
-    <div className={`popular-topic ${className}`}>
+    <div className={`popular-topic ${className}`} role="button" tabIndex={0} onClick={() => onSelect(text)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(text); } }}>
 
       <div className="popular-topic-left">
         {icon}
@@ -409,14 +421,16 @@ function PopularTopic({
 
 
 function RecentChat({
+  onSelect,
   text,
   time,
 }: {
+  onSelect: (value: string) => void;
   text: string;
   time: string;
 }) {
   return (
-    <div className="recent-chat-item">
+    <div className="recent-chat-item" role="button" tabIndex={0} onClick={() => onSelect(text)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(text); } }}>
 
       <div className="recent-chat-left">
 

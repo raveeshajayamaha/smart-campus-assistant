@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "seed": "node seed.js",
+    "make-admin": "node make-admin.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [],
   "author": "",

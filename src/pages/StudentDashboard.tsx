@@ -1,3 +1,7 @@
+import { useNavigate } from "react-router-dom";
+import { api, logout, storedUser } from "../lib/api";
+import { useRecords } from "../lib/useRecords";
+import "./CampusPages.css";
 import { useEffect, useState } from "react";
 import {
   Search,
@@ -31,6 +35,9 @@ type CampusEvent = {
 };
 
 function StudentDashboard() {
+  const navigate = useNavigate();
+  const announcements = useRecords("/announcements", "announcements");
+  const schedules = useRecords("/schedules", "schedules");
   const [events, setEvents] = useState<CampusEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -42,11 +49,8 @@ function StudentDashboard() {
 
     async function loadEvents() {
       try {
-        const response = await fetch("http://localhost:5000/api/events", {
-          signal: controller.signal,
-        });
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.events)) {
+        const data = await api("/events", { signal: controller.signal });
+        if (!data.success || !Array.isArray(data.events)) {
           throw new Error("Failed to load events");
         }
         if (active) setEvents(data.events);
@@ -91,8 +95,9 @@ function StudentDashboard() {
 
 
         <nav className="sidebar-menu">
+{storedUser()?.role === "admin" && <a className="sidebar-link" href="/admin-dashboard">Admin Dashboard</a>}
 
-          <a className="sidebar-link active" href="#">
+          <a className="sidebar-link active" href="/student-dashboard">
             <Home size={22} />
             Dashboard
           </a>
@@ -102,34 +107,34 @@ function StudentDashboard() {
             AI Assistant
           </a>
 
-          <a className="sidebar-link" href="#events">
+          <a className="sidebar-link" href="/events">
             <CalendarDays size={22} />
             Events
           </a>
 
-          <a className="sidebar-link" href="#academic">
+          <a className="sidebar-link" href="/academic">
             <BookOpen size={22} />
             Academic Info
           </a>
 
-          <a className="sidebar-link" href="#library">
+          <a className="sidebar-link" href="/library">
             <Library size={22} />
             Library
           </a>
 
-          <a className="sidebar-link" href="#map">
+          <a className="sidebar-link" href="/locations">
             <MapPin size={22} />
             Campus Map
           </a>
 
-          <a className="sidebar-link" href="#profile">
+          <a className="sidebar-link" href="/profile">
             <User size={22} />
             Profile
           </a>
 
         </nav>
 
-        <a className="logout-button" href="/login">
+        <a className="logout-button" href="/login" onClick={e => { e.preventDefault(); void logout(); }}>
           <LogOut size={22} />
           Logout
         </a>
@@ -150,6 +155,7 @@ function StudentDashboard() {
             <input
               type="text"
               placeholder="Search events, services, or ask AI..."
+              onKeyDown={e => { if (e.key === "Enter" && e.currentTarget.value.trim()) navigate("/assistant", { state: { question: e.currentTarget.value.trim() } }); }}
             />
 
           </div>
@@ -158,7 +164,7 @@ function StudentDashboard() {
 
             <div className="notification-icon">
               <Bell size={23} />
-              <span>3</span>
+              <span>{announcements.records.length}</span>
             </div>
 
             <div className="top-user-icon">
@@ -180,7 +186,7 @@ function StudentDashboard() {
             <h1>
               Welcome Back,
               <br />
-              <span>Student!</span>
+              <span>{storedUser()?.name || "Student"}!</span>
             </h1>
 
             <p>
@@ -200,7 +206,7 @@ function StudentDashboard() {
               </div>
 
               <div className="summary-box">
-                <strong>2</strong>
+                <strong>{announcements.loading ? "..." : announcements.records.length}</strong>
                 <span>New Notifications</span>
               </div>
 
@@ -228,7 +234,7 @@ function StudentDashboard() {
 
               <div className="section-title-row">
                 <h2>Quick Actions</h2>
-                <a href="#">
+                <a href="/academic">
                   View All <ArrowRight size={16} />
                 </a>
               </div>
@@ -280,7 +286,7 @@ function StudentDashboard() {
 
                 <h2>Upcoming Events</h2>
 
-                <a href="#">
+                <a href="/events">
                   View All <ArrowRight size={16} />
                 </a>
 
@@ -304,6 +310,7 @@ function StudentDashboard() {
                       title={event.title}
                       time={event.time}
                       location={event.location}
+                      description={event.description}
                     />
                   ))
                 )}
@@ -325,36 +332,14 @@ function StudentDashboard() {
 
                 <h2>My Schedule</h2>
 
-                <a href="#">
+                <a href="/academic">
                   View All <ArrowRight size={16} />
                 </a>
 
               </div>
 
 
-              <ScheduleItem
-                date="03"
-                title="Data Structures Lecture"
-                time="08:30 AM - 10:00 AM"
-                location="Hall A1"
-                type="blue"
-              />
-
-              <ScheduleItem
-                date="03"
-                title="Digital Systems Lab"
-                time="01:00 PM - 03:00 PM"
-                location="Lab 2"
-                type="green"
-              />
-
-              <ScheduleItem
-                date="04"
-                title="Group Project Meeting"
-                time="10:00 AM - 11:00 AM"
-                location="Online (Zoom)"
-                type="orange"
-              />
+              {schedules.loading ? <p role="status">Loading schedule...</p> : schedules.error ? <p role="alert">{schedules.error}</p> : schedules.records.length === 0 ? <p>No schedule entries available.</p> : schedules.records.map((entry, i) => <ScheduleItem key={entry._id} date={entry.date} title={entry.subject} time={`${entry.startTime} - ${entry.endTime}`} location={entry.location} type={["blue", "green", "orange"][i % 3]} />)}
 
             </section>
 
@@ -366,30 +351,14 @@ function StudentDashboard() {
 
                 <h2>Announcements</h2>
 
-                <a href="#">
+                <a href="/announcements">
                   View All <ArrowRight size={16} />
                 </a>
 
               </div>
 
 
-              <Announcement
-                icon={<Megaphone />}
-                title="Semester 3 Registration"
-                description="Registration closes soon"
-              />
-
-              <Announcement
-                icon={<BookOpen />}
-                title="Library Maintenance"
-                description="Library will be temporarily closed"
-              />
-
-              <Announcement
-                icon={<GraduationCap />}
-                title="Career Fair 2026"
-                description="Industry partners and internships"
-              />
+              {announcements.loading ? <p role="status">Loading announcements...</p> : announcements.error ? <p role="alert">{announcements.error}</p> : announcements.records.length === 0 ? <p>No announcements available.</p> : announcements.records.map(entry => <Announcement key={entry._id} icon={<Megaphone />} title={`${entry.title}${entry.priority !== "normal" ? " (" + entry.priority + ")" : ""}`} description={entry.description} />)}
 
             </section>
 
@@ -413,8 +382,10 @@ function QuickAction({
   title: string;
   className: string;
 }) {
+  const targets: Record<string, string> = { "academic-card": "/academic", "event-card-action": "/events", "library-card": "/library", "map-card": "/locations", "ai-card": "/assistant" };
+  const go = () => window.location.assign(targets[className]);
   return (
-    <div className={`quick-action-card ${className}`}>
+    <div className={`quick-action-card ${className}`} role="link" tabIndex={0} onClick={go} onKeyDown={e => { if (e.key === "Enter") go(); }}>
 
       <div className="quick-action-icon">
         {icon}
@@ -430,12 +401,14 @@ function QuickAction({
 
 
 function DashboardEvent({
+  description,
   image,
   date,
   title,
   time,
   location,
 }: {
+  description: string;
   image: string;
   date: string;
   title: string;
@@ -473,7 +446,7 @@ function DashboardEvent({
           {location}
         </p>
 
-        <button>
+        <button onClick={() => window.alert(`${title}\n${description}\n${time} - ${location}`)}>
           View Details
           <ArrowRight size={15} />
         </button>
@@ -503,9 +476,9 @@ function ScheduleItem({
 
       <div className="schedule-date">
 
-        <small>OCT</small>
+        <small>{new Date(date).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }).toUpperCase()}</small>
 
-        <strong>{date}</strong>
+        <strong>{new Date(date).toLocaleDateString("en-US", { day: "2-digit", timeZone: "UTC" })}</strong>
 
       </div>
 

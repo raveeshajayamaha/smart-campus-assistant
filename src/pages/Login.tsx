@@ -57,10 +57,11 @@ function Login() {
 
       // Save logged-in user details
       localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
 
       // Redirect after successful login
       setTimeout(() => {
-        navigate("/student-dashboard");
+        navigate(data.user.role === "admin" ? "/admin-dashboard" : "/student-dashboard");
       }, 1000);
 
     } catch (error) {

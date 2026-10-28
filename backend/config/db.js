@@ -1,15 +1,6 @@
 const mongoose = require("mongoose");
-
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-
-    console.log("MongoDB connected successfully");
-    console.log("Connected database:", mongoose.connection.name);
-  } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
-    process.exit(1);
-  }
+module.exports = async () => {
+  if (!process.env.MONGO_URI) throw new Error("Set MONGO_URI in backend/.env");
+  await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 10000, ...(process.env.MONGO_DB_NAME ? { dbName: process.env.MONGO_DB_NAME } : {}) });
+  console.log("MongoDB connected successfully");
 };
-
-module.exports = connectDB;

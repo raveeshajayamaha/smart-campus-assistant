@@ -1,19 +1,102 @@
 @baseUrl = http://localhost:5000
+@token = PASTE_LOGIN_TOKEN_HERE
+@recordId = PASTE_RECORD_ID_HERE
 
-### Create an event (each send creates a new MongoDB document)
-POST {{baseUrl}}/api/events
+### Register (public; always student)
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
-{
-  "title": "AI & Future Technologies Workshop",
-  "description": "Workshop about artificial intelligence and future technologies.",
-  "date": "2026-10-25",
-  "time": "10:00 AM - 12:00 PM",
-  "location": "Main Auditorium",
-  "image": "/images/event1.png",
-  "category": "Workshop"
-}
+{"name":"Demo Student","email":"demo@example.com","password":"CampusDemo123"}
 
-### Retrieve all events, sorted by date
+### Login; copy token into @token. Use an admin account for writes.
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{"email":"demo@example.com","password":"CampusDemo123"}
+
+### Current authenticated user
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Events (public read)
 GET {{baseUrl}}/api/events
-Accept: application/json
+
+### Create event (admin)
+POST {{baseUrl}}/api/events
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"title":"AI Workshop","description":"Campus AI demo","date":"2026-11-02","time":"10:00 AM - 12:00 PM","location":"Main Auditorium","image":"/images/event1.png","category":"Workshop"}
+
+### Announcements
+GET {{baseUrl}}/api/announcements
+Authorization: Bearer {{token}}
+
+### Create announcement (admin)
+POST {{baseUrl}}/api/announcements
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"title":"Semester Registration","description":"Register through your faculty office this week.","category":"Academic","date":"2026-10-28","priority":"high"}
+
+### Schedules
+GET {{baseUrl}}/api/schedules
+Authorization: Bearer {{token}}
+
+### Create schedule (admin; times use 24-hour HH:mm)
+POST {{baseUrl}}/api/schedules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"subject":"Data Structures","date":"2026-11-02","startTime":"08:30","endTime":"10:00","location":"Hall A1","type":"Lecture"}
+
+### Library resources
+GET {{baseUrl}}/api/library
+Authorization: Bearer {{token}}
+
+### Create resource (admin)
+POST {{baseUrl}}/api/library
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"title":"MDN Web Docs","type":"Digital resource","description":"Web development reference","availability":"Online","location":"Online","link":"https://developer.mozilla.org/"}
+
+### Campus locations
+GET {{baseUrl}}/api/locations
+Authorization: Bearer {{token}}
+
+### Create location (admin)
+POST {{baseUrl}}/api/locations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"name":"Computer Lab","building":"Engineering Block","description":"Student computing facilities","category":"Lab","openingHours":"Monday-Friday 08:00-17:00","directions":"First floor, turn right"}
+
+### Chat (repeat with events, announcements, timetable or locations questions)
+POST {{baseUrl}}/api/assistant/chat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"message":"What are the library hours?"}
+
+### Update an announcement (same pattern for events/schedules/library/locations)
+PUT {{baseUrl}}/api/announcements/{{recordId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"priority":"urgent"}
+
+### Delete announcement (same pattern for each collection)
+DELETE {{baseUrl}}/api/announcements/{{recordId}}
+Authorization: Bearer {{token}}
+
+### Invalid input: expect 400 when authenticated as admin
+POST {{baseUrl}}/api/schedules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"subject":"Invalid example"}
+
+### Logout; token becomes invalid
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{token}}
