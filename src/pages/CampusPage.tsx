@@ -14,7 +14,7 @@ export default function CampusPage({ section }: { section: keyof typeof config }
   const { records, loading, error } = useRecords(c.path, c.key);
   const [search, setSearch] = useState("");
   const visible = records.filter(r => Object.values(r).join(" ").toLowerCase().includes(search.toLowerCase()));
-  return <CampusLayout title={c.title}><label>Search {c.title}<br /><input className="campus-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, subject, category or location" /></label>
+  return <CampusLayout title={c.title}><label className="campus-search-field">Search {c.title}<input className="campus-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, subject, category or location" /></label>
     {loading ? <p role="status">Loading...</p> : error ? <p role="alert">{error} <button onClick={() => window.location.reload()}>Retry</button></p> : !visible.length ? <p role="status">No matching records available.</p> : <div className="campus-grid">{visible.map(r => <article className="campus-card" key={r._id}>
       <h2>{r.title || r.subject || r.name}</h2>
       {c.fields.map(field => <p key={field}><strong>{field.replace(/([A-Z])/g, " $1")}: </strong>{field === "date" ? new Date(r[field]).toLocaleDateString("en-GB", { timeZone: "UTC" }) : r[field]}</p>)}
