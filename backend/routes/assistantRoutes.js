@@ -25,7 +25,63 @@ router.post("/chat", authenticate, async (req, res) => {
   };
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   const todayDate = new Date(today + "T00:00:00.000Z");
-  if (/event|workshop|activity|activities|fair/.test(q)) add("Events", relevant(await Event.find({ date: { $gte: todayDate } }).sort({ date: 1 }).lean(), q), r => `${r.title} - ${date(r.date)}, ${r.time}, ${r.location}. ${r.description}`);
+  if (/event|workshop|activity|activities|fair/.test(q)) {
+  let records;
+
+  const asksUpcoming = /upcoming|coming up|future|next/.test(q);
+
+  if (asksUpcoming) {
+    records = await Event.find({
+      date: { $gte: todayDate }
+    })
+      .sort({ date: 1 })
+      .lean();
+
+    // If there are no future events, show the latest stored events instead
+    if (!records.length) {
+      records = await Event.find()
+        .sort({ date: -1 })
+        .limit(5)
+        .lean();
+
+      sources.push(
+        ...records.map(r => ({
+          collection: "Events",
+          id: r._id
+        }))
+      );
+
+      sections.push(
+        "Events:\nThere are no upcoming events at the moment, but here are the latest campus events available:\n" +
+          records
+            .map(
+              r =>
+                `${r.title} - ${date(r.date)}, ${r.time}, ${r.location}. ${r.description}`
+            )
+            .join("\n")
+      );
+    } else {
+      add(
+        "Events",
+        relevant(records, q),
+        r =>
+          `${r.title} - ${date(r.date)}, ${r.time}, ${r.location}. ${r.description}`
+      );
+    }
+  } else {
+    // General event questions show events stored in MongoDB
+    records = await Event.find()
+      .sort({ date: -1 })
+      .lean();
+
+    add(
+      "Events",
+      relevant(records, q),
+      r =>
+        `${r.title} - ${date(r.date)}, ${r.time}, ${r.location}. ${r.description}`
+    );
+  }
+}
   if (/announcement|notice|notification|registration|support|student service/.test(q)) add("Announcements", relevant(await Announcement.find().sort({ date: -1 }).lean(), q), r => `${r.title} (${r.priority}, ${date(r.date)}): ${r.description}`);
   if (/class|schedule|timetable|academic|lecture|exam|course/.test(q)) {
     let records = await Schedule.find({ date: { $gte: todayDate } }).sort({ date: 1, startTime: 1 }).lean();
