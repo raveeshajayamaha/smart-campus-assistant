@@ -57,10 +57,11 @@
 .admin-topbar-account strong { display: block; font-size: 12px; font-weight: 650; }
 .admin-topbar-account small { display: block; font-size: 9px; color: #96a1b2; margin-top: 1px; }
 .admin-main { padding: 28px 34px 18px; max-width: 1700px; margin: auto; }
-.admin-welcome { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 30px; background: linear-gradient(115deg, #e9f2ff, #f0f6ff 63%, #e6efff); border: 1px solid #dde9fb; border-radius: 13px; padding: 29px 34px; overflow: hidden; }
+.admin-welcome { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 30px; background: linear-gradient(90deg, rgba(5, 35, 72, 0.88) 0%, rgba(5, 35, 72, 0.55) 50%, rgba(5, 35, 72, 0.22) 100%), url("/images/Campus-bg.png"); background-size: cover; background-position: center; background-repeat: no-repeat; border: 1px solid #dde9fb; border-radius: 13px; padding: 29px 34px; overflow: hidden; }
 .admin-eyebrow { display: block; font-size: 9px; color: #5181bd; font-weight: 700; letter-spacing: 1.8px; margin-bottom: 10px; }
-.admin-welcome h2 { font-size: clamp(23px, 2vw, 31px); font-weight: 750; line-height: 1.25; }
-.admin-welcome p { font-size: 12px; line-height: 1.8; color: #7085a1; margin: 12px 0 20px; }
+.admin-welcome .admin-eyebrow { color: #c5e2ff; }
+.admin-welcome h2 { color: #fff; font-size: clamp(23px, 2vw, 31px); font-weight: 750; line-height: 1.25; }
+.admin-welcome p { font-size: 12px; line-height: 1.8; color: #e4edf7; margin: 12px 0 20px; }
 .admin-primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #fff; background: #1674ef; box-shadow: 0 3px 7px #1674ef19; border: 1px solid #1674ef; border-radius: 7px; padding: 10px 16px; font-size: 12px !important; font-weight: 600 !important; white-space: nowrap; }
 .admin-primary-button:hover:not(:disabled) { background: #0861d5; border-color: #0861d5; box-shadow: 0 4px 12px #1674ef35; }
 .admin-welcome-art { position: relative; display: grid; place-items: center; height: 156px; width: 200px; color: #6b9eec; flex-shrink: 0; }
