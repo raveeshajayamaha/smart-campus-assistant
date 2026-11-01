@@ -1,7 +1,12 @@
 const crypto = require("node:crypto");
 const Session = require("../models/Session");
 const hashToken = token => crypto.createHash("sha256").update(token).digest("hex");
-const publicUser = user => ({ id: user._id, name: user.name, email: user.email, role: user.role });
+const publicUser = user => ({
+  id: user._id, name: user.name, email: user.email, role: user.role,
+  studentId: user.studentId, faculty: user.faculty, department: user.department,
+  yearSemester: user.yearSemester, contactNumber: user.contactNumber,
+  createdAt: user.createdAt, updatedAt: user.updatedAt,
+});
 async function authenticate(req, res, next) {
   const token = req.headers.authorization?.match(/^Bearer ([a-f0-9]{64})$/)?.[1];
   if (!token) return res.status(401).json({ success: false, message: "Please log in" });

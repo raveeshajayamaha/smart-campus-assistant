@@ -1,0 +1,108 @@
+/* Scoped to Profile so shared student pages retain their existing appearance. */
+.student-profile {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.student-profile .profile-card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #dfe6ef;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 18px #062f6308;
+}
+
+.student-profile .profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-bottom: 24px;
+}
+
+.student-profile .profile-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 96px;
+  width: 96px;
+  height: 96px;
+  border: 5px solid #f2f7ff;
+  border-radius: 50%;
+  background: #e2efff;
+  color: #216bce;
+}
+
+.student-profile .profile-identity-text { min-width: 0; }
+.student-profile .profile-eyebrow { color: #216bce; font-size: 11px; font-weight: 750; letter-spacing: 1.4px; }
+.student-profile h2 { margin: 0; color: #0b1f44; font-size: 20px; line-height: 1.35; }
+.student-profile .profile-identity h2 { margin-top: 5px; font-size: clamp(24px, 3vw, 30px); }
+.student-profile .profile-email { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; color: #465771; }
+.student-profile .profile-email svg { flex-shrink: 0; }
+.student-profile .profile-badges { display: flex; flex-wrap: wrap; gap: 10px; }
+.student-profile .profile-badges > span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.student-profile .profile-role { background: #eaf3ff; color: #195db3; text-transform: capitalize; }
+.student-profile .profile-session { background: #edf8f3; color: #20704d; }
+
+.student-profile .profile-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; margin: 0; }
+.student-profile .profile-field { min-width: 0; }
+.student-profile dt { margin-bottom: 5px; color: #52647c; font-size: 13px; }
+.student-profile dd { margin: 0; color: #102855; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.student-profile dd.profile-missing { color: #64748b; font-weight: 400; }
+.student-profile .profile-overview .profile-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); padding-top: 20px; border-top: 1px solid #e8edf5; }
+.student-profile .profile-section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.student-profile .profile-section-heading p { margin: 5px 0 0; color: #52647c; font-size: 14px; }
+.student-profile .profile-section-icon { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 12px; color: #216bce; background: #edf4ff; }
+
+.student-profile .profile-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.student-profile .profile-action { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 16px 12px; border: 1px solid #dbe7f6; border-radius: 12px; background: #f5f9ff; color: #195db3; font: inherit; font-size: 13px; font-weight: 650; text-align: left; text-decoration: none; }
+.student-profile .profile-action > svg { flex-shrink: 0; }
+.student-profile .profile-action > span { min-width: 0; flex: 1; }
+.student-profile .profile-action small { display: block; margin-top: 4px; color: #52647c; font-size: 11px; font-weight: 400; }
+.student-profile .profile-action:disabled { background: #f7f9fc; border-color: #e4eaf2; color: #64748b; cursor: not-allowed; }
+.student-profile a.profile-action:hover { background: #e8f2ff; border-color: #216bce; }
+.student-profile a.profile-action:focus-visible { outline: 3px solid #216bce; outline-offset: 3px; }
+.student-profile .profile-help { margin: 18px 0 0; color: #52647c; font-size: 13px; }
+
+@media (max-width: 1100px) {
+  .student-profile .profile-overview .profile-fields,
+  .student-profile .profile-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .student-profile .profile-card { padding: 20px; }
+  .student-profile .profile-identity { flex-direction: column; text-align: center; gap: 14px; }
+  .student-profile .profile-email,
+  .student-profile .profile-badges { justify-content: center; }
+  .student-profile .profile-fields,
+  .student-profile .profile-overview .profile-fields,
+  .student-profile .profile-actions { grid-template-columns: minmax(0, 1fr); }
+}
+
+.student-profile button.profile-action:not(:disabled) { cursor: pointer; }
+.student-profile button.profile-action:not(:disabled):hover { background: #e8f2ff; border-color: #216bce; }
+.student-profile .profile-edit-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; }
+.student-profile .profile-edit-fields label { display: grid; align-content: start; gap: 7px; min-width: 0; color: #52647c; font-size: 13px; }
+.student-profile .profile-edit-fields input { min-width: 0; width: 100%; padding: 11px 12px; border: 1px solid #c8d5e6; border-radius: 9px; background: #fff; color: #102855; font: inherit; font-size: 15px; }
+.student-profile .profile-edit-fields input:read-only,
+.student-profile .profile-edit-fields input:disabled { background: #f4f7fb; color: #52647c; }
+.student-profile .profile-edit-fields input[aria-invalid="true"] { border-color: #b42318; }
+.student-profile .profile-field-error { color: #b42318; font-size: 12px; }
+.student-profile .profile-edit-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.student-profile .profile-edit-buttons button { padding: 11px 18px; border: 1px solid #216bce; border-radius: 9px; background: #216bce; color: #fff; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.student-profile .profile-edit-buttons button[type="button"] { background: #fff; color: #195db3; }
+.student-profile .profile-edit-buttons button:disabled { opacity: 0.65; cursor: wait; }
+.student-profile .profile-feedback { margin: 0; padding: 12px 16px; border: 1px solid; border-radius: 10px; font-size: 14px; }
+.student-profile .profile-success { color: #20704d; background: #edf8f3; border-color: #bee4d1; }
+.student-profile .profile-error { color: #b42318; background: #fff1f0; border-color: #ffc9c4; margin-top: 20px; }
+@media (max-width: 700px) {
+  .student-profile .profile-edit-fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+.student-profile .profile-password-fields { max-width: 680px; grid-template-columns: minmax(0, 1fr); }
+.student-profile .profile-password-field { display: grid; min-width: 0; gap: 7px; }
+.student-profile .profile-password-field small { color: #52647c; font-size: 12px; }
+.student-profile .profile-password-input { position: relative; min-width: 0; }
+.student-profile .profile-password-input input { padding-right: 48px; }
+.student-profile .profile-password-input button { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 44px; height: 100%; padding: 0; border: 0; border-radius: 0 9px 9px 0; background: transparent; color: #52647c; cursor: pointer; }
+.student-profile .profile-password-input button:disabled { cursor: wait; }

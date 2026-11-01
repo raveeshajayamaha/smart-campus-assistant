@@ -1,5 +1,10 @@
 export type CampusRecord = { _id: string; [key: string]: string };
-export type CampusUser = { id: string; name: string; email: string; role: string };
+export type CampusUser = {
+  id: string; name: string; email: string; role: string;
+  studentId?: string; faculty?: string; department?: string;
+  yearSemester?: string; contactNumber?: string;
+  createdAt?: string; updatedAt?: string;
+};
 export function storedUser(): CampusUser | null {
   try { return JSON.parse(localStorage.getItem("user") || "null"); } catch { return null; }
 }
